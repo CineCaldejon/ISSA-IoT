@@ -22,7 +22,7 @@ def Identification(packet):
 			if not (parsePacket == 1):
 				print("I HAVE A VALID SERVICE PACKET FORMAT")
 				parsePacket['Header'] = header
-				#return Authentication.Authenticate(parsePacket)
+				Authentication.Authenticate(parsePacket)
 
 def parseHandShake(packet):
 	transmitPack = uni_handMod.handshakeHub(packet)
