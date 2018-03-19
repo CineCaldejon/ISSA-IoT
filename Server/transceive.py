@@ -15,9 +15,6 @@ result = channel.queue_declare(exclusive=True)
 queue_name = result.method.queue
 channel.queue_bind(exchange='serverHand',queue=queue_name)
 
-
-
-
 def WF_transmit(packet):
 	channel.basic_publish(exchange='clientHand',
                       routing_key='',
@@ -29,7 +26,6 @@ def getZb():
 
 def callback(ch, method, properties, body):
 	packetQueue.put(body)
-
 
 def zbRecv():
 	global testlock
