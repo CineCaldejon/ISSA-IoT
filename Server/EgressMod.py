@@ -40,6 +40,13 @@ def concatHmac(data,secret): # use packet as data
 
 	return concated
 
+def handEgress(packet):
+	print("handEgress: TO BE SENT OUT: ", packet)
+	zb = getZb()
+	eol= b'\r\n'
+	time.sleep(4)
+	zb.write(packet+eol)
+	WF_transmit(packet)
 
 def Egress(parsePacket):
 	packet = Encapsulator(parsePacket)

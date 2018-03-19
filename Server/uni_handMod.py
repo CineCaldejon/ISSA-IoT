@@ -12,15 +12,13 @@ import serial
 
 import sqliteConnector
 
-SERPORT = 'COM8'
-
 def handshakeHub(packet):
 	print("hub packet:",binascii.hexlify(packet))
 	
 	#print("parse is: ",packet[1:2])
 	phase = int.from_bytes(packet[1:2],byteorder='big')
 	#phase = "{:02x}".format(ord(packet[1:2]))
-	macAddr = packet[2:9]
+	macAddr = packet[2:10]
 	macAddr = binascii.hexlify(macAddr).decode()
 	#print(phase)
 	if(sqliteConnector.checkPhase(macAddr,phase)):#TODO: return true if valid false if invalid
@@ -66,7 +64,7 @@ def validateCookie(cookie,macAddr):
 
 def phaseOne(packet):
 	phase = packet[0:1]
-	macAddr = packet[2:9]
+	macAddr = packet[2:10]
 	#print(binascii.hexlify(phase))
 	#print(binascii.hexlify(macAddr))# NOTE: binascii is for printing only
 	ht = MD5.new()
@@ -83,7 +81,7 @@ def phaseOne(packet):
 def phaseTwo(packet):
 	print("P2 packet: ", binascii.hexlify(packet))
 	cookie = packet[-16:]
-	macAddr = packet[2:9]
+	macAddr = packet[2:10]
 
 	print("cookie: ",binascii.hexlify(cookie))
 	print("macAddr: ",binascii.hexlify(macAddr))
@@ -104,9 +102,9 @@ def phaseTwo(packet):
 def phaseThree(payload):
 	global privkey
 	phaseHeader=b'\x00\x03'
-	cypher = payload[9:]
+	cypher = payload[10:]
 	print("p3 cypher: ",binascii.hexlify(cypher))
-	macAddr =payload[2:9]
+	macAddr =payload[2:10]
 	#macAddr = binascii.hexlify(macAddr).decode()
 	decryptedKey = rsa.decrypt(cypher,privkey)
 	print("THE DECRYPTED KEY IS :",decryptedKey)
@@ -121,10 +119,10 @@ def phaseThree(payload):
 		return phaseHeader+macAddr+cypherSecret
 
 def phaseFour(payload):
-	macAddr = payload[2:9]
+	macAddr = payload[2:10]
 	print(macAddr)
 	print(binascii.hexlify(macAddr).decode())
-	cypher = payload[9:]
+	cypher = payload[10:]
 	psk = sqliteConnector.getPSK(binascii.hexlify(macAddr).decode())#TODO: get psk based on macaddr
 	aesKey = AES.new(psk.encode(),AES.MODE_ECB)
 	secret = aesKey.decrypt(cypher).decode()
