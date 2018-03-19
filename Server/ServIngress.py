@@ -16,7 +16,7 @@ def Identification(packet):
 		if(header == b'\x00'):
 			retPack = parseHandShake(packet)
 			print("returning: ",binascii.hexlify(retPack))
-			EgressMod.Egress(retPack)
+			EgressMod.handEgress(retPack)
 		elif(header == b'\x01'):
 			parsePacket = parseService(packet)
 			if not (parsePacket == 1):

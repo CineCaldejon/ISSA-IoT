@@ -1,5 +1,5 @@
 import sqlite3
-
+import binascii
 '''
 Functions include:
 
@@ -18,6 +18,8 @@ checkACL(src, dst, service) returns True or False
 
 '''
 
+
+# get functions, when no entry in DB, return None(???)
 
 def getNodeList():
 	conn = sqlite3.connect('test2.db')
@@ -43,6 +45,16 @@ def getSecret(node):
 
 	return secret
 
+def checkSecret(secret,macAddr):
+	nodeID = getNodeID(macAddr)
+	DBsecret = getSecret(nodeID)
+	print("nodeID is: ",nodeID)
+	print("DBsecret is: ",DBsecret)
+	print("secret is: ",secret)
+	if(DBsecret==secret):
+		return True
+	else:
+		return False
 
 def getNodeID(macAddr):
 	conn = sqlite3.connect('test2.db')
@@ -51,7 +63,7 @@ def getNodeID(macAddr):
 	nodeID = nodeRow[1]
 
 	conn.close()
-
+	print("returning: ",nodeID)
 	return nodeID
 
 
@@ -81,29 +93,48 @@ def getAddressing(node):
 
 
 def storeCookie(cookie, macAddr):
+	print("SC mac:",macAddr)
 	conn = sqlite3.connect('test2.db')
 	c=conn.cursor()
+	cookie=binascii.hexlify(cookie).decode()
 
-	data = [macAddr, 0, cookie]
+	data = [macAddr, 0, cookie, macAddr]
 
-	c.execute("INSERT INTO Phase VALUES (?,?,?)", data)
+
+	c.execute("UPDATE Phase set cookie = ? WHERE phyAddress = ?",(cookie,macAddr))
+	#c.execute("INSERT INTO Phase VALUES (?,?,?)", data)
 
 	conn.commit()
 
 	conn.close()
 
 
-def storeSecret(nodeID, secret):
+def storeSecret(secret,macAddr):
 	conn = sqlite3.connect('test2.db')
+	nodeID = getNodeID(macAddr)
 	c=conn.cursor()
 
-	data = [nodeID, secret]
+	c.execute("UPDATE Secret set secret = ? WHERE nodeID = ?",(secret,nodeID))
 
-	c.execute("INSERT INTO Secret VALUES (?,?)", data)
+	#data = [nodeID, secret]
+
+	#c.execute("INSERT INTO Secret VALUES (?,?)", data)
 
 	conn.commit()
 
 	conn.close()
+
+# def storeSecret(nodeID, secret):
+# 	conn = sqlite3.connect('test2.db')
+# 	c=conn.cursor()
+
+# 	data = [nodeID, secret]
+
+# 	c.execute("INSERT INTO Secret VALUES (?,?)", data)
+
+# 	conn.commit()
+
+# 	conn.close()
 
 
 def setPhase (macAddr, phase):
@@ -133,6 +164,7 @@ def validateCookie(cookie, macAddr):
 	    return False
 
 def checkPhase(macAddr, phase):
+	print("searching: ",macAddr)
 	conn = sqlite3.connect('test2.db')
 	DBPhase = None
 	PhaseConn = conn.execute("SELECT * from Phase where phyAddress = ?",(macAddr,))
@@ -143,21 +175,25 @@ def checkPhase(macAddr, phase):
 	conn.close()
 
 	if (DBPhase == phase):
-	    return True
+		print('correct phase')
+		return True
 	else:
-	    return False
+		print(DBPhase,"not",phase)
+		return False
 
 
 def validatePSK(macAddr, PSK):
 	conn = sqlite3.connect('test2.db')
 	DBPSK = None
+	print("looking for: ",macAddr)
 	PSKConn = conn.execute("SELECT * from PSK where phyAddress = ?",(macAddr,))
 	PSKRow = PSKConn.fetchone()
 	if not (PSKRow == None):
 		DBPSK = PSKRow[1]
 
 	conn.close()
-
+	print("DBPSK is: ",DBPSK)
+	print("PSK is: ",PSK)
 	if (DBPSK == PSK):
 	    return True
 	else:
