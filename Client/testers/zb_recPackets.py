@@ -4,12 +4,15 @@ import Receive
 from Crypto.Hash import MD5
 
 
-zb = serial.Serial('COM9')
+zb = serial.Serial('COM4', timeout=1)
 while True:
 	try:
 		data = zb.readline()
-		Receive.Receive(data[:-2])
+		if not (data == b''):
+			check = Receive.Receive(data[:-2])
 	except KeyboardInterrupt:
+		print("KeyboardInterrupt")
+		zb.close()
 		sys.exit()
 
 # def sendpacket():

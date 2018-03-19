@@ -22,6 +22,7 @@ def Receive(packet):
 				print("OMG IT'S FOR ME :>")
 				parsePacket['Header'] = header
 				check = HMACCheck(parsePacket)
+				return check
 
 def parseHandshake(packet):
 	#phaseList = [b'\x00', b'\x01', b'\x02', b'\x03', b'\x04'] #possible values for handshake phase
