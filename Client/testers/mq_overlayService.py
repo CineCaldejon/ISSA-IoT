@@ -11,7 +11,7 @@ channel.queue_bind(exchange='serverHand',queue=queue_name)
 
 
 def WF_transmit(packet):
-	channel.basic_publish(exchange='clientHand',
+	channel.basic_publish(exchange='serverHand',
                       routing_key='',
                       body=packet)
 
