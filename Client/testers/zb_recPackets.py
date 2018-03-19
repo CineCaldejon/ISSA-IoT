@@ -1,3 +1,4 @@
+import sys
 import serial
 import Receive
 from Crypto.Hash import MD5
@@ -5,8 +6,11 @@ from Crypto.Hash import MD5
 
 zb = serial.Serial('COM9')
 while True:
-	data = zb.readline()
-	Receive.Receive(data[:-2])
+	try:
+		data = zb.readline()
+		Receive.Receive(data[:-2])
+	except KeyboardInterrupt:
+		sys.exit()
 
 # def sendpacket():
 # 	header = b'\x01\x00\x07\x2c\x04\x12\xff'
