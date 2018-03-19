@@ -2,6 +2,8 @@ import sqliteConnector
 import Authentication
 import uni_handMod
 import binascii
+import EgressMod
+
 def Identification(packet):
 	headerList = [b'\x00', b'\x01'] #possible values for header
 
@@ -14,20 +16,17 @@ def Identification(packet):
 		if(header == b'\x00'):
 			retPack = parseHandShake(packet)
 			print("returning: ",binascii.hexlify(retPack))
-			return retPack	
+			EgressMod.Egress(retPack)
 		elif(header == b'\x01'):
 			parsePacket = parseService(packet)
 			if not (parsePacket == 1):
 				print("I HAVE A VALID SERVICE PACKET FORMAT")
 				parsePacket['Header'] = header
-				return Authentication.Authenticate(parsePacket)
+				#return Authentication.Authenticate(parsePacket)
 
 def parseHandShake(packet):
 	transmitPack = uni_handMod.handshakeHub(packet)
-	#print("handshakehub is returning: ",binascii.hexlify(transmitPack))
 	return transmitPack
-	#phaseList = [b'\x00', b'\x01', b'\x02', b'\x03', b'\x04'] #possible values for handshake phase
-	#shakePhase = packet[1:2]
 
 def parseService(packet):
 	print("I AM A SERVICE PACKET")
