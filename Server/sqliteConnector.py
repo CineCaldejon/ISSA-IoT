@@ -79,17 +79,14 @@ def getPSK(macAddr):
 
 
 def getAddressing(node):
-	AddDict = {'Infra': '', 'InfrAdd': ''}
 	conn = sqlite3.connect('test2.db')
 	AddConn = conn.execute("SELECT * from Addressing where nodeID = ?",(node,))
 	AddRow = AddConn.fetchone()
 	if not (AddRow == None):
-		AddDict['Infra'] = AddRow[2]
-		AddDict['InfrAdd'] = AddRow[3]
-
+		Infra = AddRow[2]
 	conn.close()
 
-	return AddDict
+	return Infra
 
 
 def storeCookie(cookie, macAddr):
@@ -174,6 +171,11 @@ def checkPhase(macAddr, phase):
 
 	conn.close()
 
+	if(DBPhase==4 and phase==0):
+		print("reauth")
+		return True
+
+
 	if (DBPhase == phase):
 		print('correct phase')
 		return True
@@ -212,15 +214,26 @@ def checkACL(src, dst, service):
 	else:
 	    return False
 
+def storeInfra(node,mac,infra):
+	conn = sqlite3.connect('test2.db')
+	c=conn.cursor()
+	infraName=''
+
+	if(infra==1):
+		infraName='802.15.4'
+	if(infra==0):
+		infraName='802.11'
+
+	c.execute("UPDATE Addressing SET phyAddress = ? AND Infrastructure = ? WHERE nodeID = ?", (mac,infraName,node))
+
+	conn.commit()
+	conn.close()
 
 
+	# 	data = [nodeID, secret]
 
+# 	c.execute("INSERT INTO Secret VALUES (?,?)", data)
 
+# 	conn.commit()
 
-
-
-
-
-
-
-
+# 	conn.close()
