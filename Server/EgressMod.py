@@ -6,18 +6,14 @@ from transceive import WF_transmit
 
 import time
 
-def AddressingQuery(nodeID):
-	AddDict = sqliteConnector.getAddressing(nodeID)
+def InfraQuery(nodeID):
+	Infra = sqliteConnector.getAddressing(nodeID)
 
-	return AddDict
-
-
+	return Infra
 
 def Encapsulator(parsePacket):
 	print("I AM BEING ENCAPSULATED")
-	AddDict = AddressingQuery((parsePacket['dst'])[0])
-	infra = AddDict['Infra']
-	infrAdd = AddDict['InfrAdd']
+	Infra = InfraQuery((parsePacket['dst'])[0])
 	print("dest is :",parsePacket['dst'][0])
 	secret = sqliteConnector.getSecret((parsePacket['dst'])[0])
 	print("secret is",secret)
