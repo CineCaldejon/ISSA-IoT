@@ -9,10 +9,11 @@ import time
 import threading
 import serial
 (pubkey,privkey) = rsa.newkeys(512)
-
+infra =''
 import sqliteConnector
 
 def handshakeHub(packet):
+	global infra
 	print("hub packet:",binascii.hexlify(packet))
 	
 	#print("parse is: ",packet[1:2])
@@ -20,6 +21,7 @@ def handshakeHub(packet):
 	#phase = "{:02x}".format(ord(packet[1:2]))
 	macAddr = packet[2:10]
 	macAddr = binascii.hexlify(macAddr).decode()
+
 	#print(phase)
 	if(sqliteConnector.checkPhase(macAddr,phase)):#TODO: return true if valid false if invalid
 		if(phase==0):
@@ -32,7 +34,8 @@ def handshakeHub(packet):
 		if(phase==1):
 			print("phase two")
 			sqliteConnector.setPhase(macAddr,phase+1)
-			handPack=phaseTwo(packet)
+			infra,handPack=phaseTwo(packet)
+			print("returned infra:",infra)
 			print("handpack: ",handPack)
 			return handPack
 			#transmit(handPack)
@@ -46,7 +49,7 @@ def handshakeHub(packet):
 		if(phase==3):
 			print("phase 4")
 			sqliteConnector.setPhase(macAddr,phase+1)
-			handPack=phaseFour(packet)
+			handPack=phaseFour(packet,infra)
 			print("handpack: ",handPack)
 			return handPack
 			#transmit(handPack)
@@ -80,12 +83,13 @@ def phaseOne(packet):
 
 def phaseTwo(packet):
 	print("P2 packet: ", binascii.hexlify(packet))
+
 	cookie = packet[-16:]
 	macAddr = packet[2:10]
-
+	infra = packet[10:11]
 	print("cookie: ",binascii.hexlify(cookie))
 	print("macAddr: ",binascii.hexlify(macAddr))
-
+	print("infra: ",binascii.hexlify(infra))
 	ht = MD5.new()
 	ht.update(macAddr)
 	buff = ht.hexdigest()
@@ -94,7 +98,7 @@ def phaseTwo(packet):
 	if(sqliteConnector.validateCookie(binascii.hexlify(cookie).decode(),binascii.hexlify(macAddr).decode())):#TODO: return true if cookie and mac matches else return false
 		exportKey = pubkey.save_pkcs1(format='DER')
 		print("pubKey is: ",binascii.hexlify(exportKey))
-		return phaseHeader+macAddr+exportKey
+		return infra,phaseHeader+macAddr+exportKey
 	else:
 		return False
 
@@ -118,9 +122,10 @@ def phaseThree(payload):
 		#cypherSecret = aesKey.encrypt(pad(secret.encode(),16))
 		return phaseHeader+macAddr+cypherSecret
 
-def phaseFour(payload):
+def phaseFour(payload,infra):
+	print("infra: ",infra)
 	macAddr = payload[2:10]
-	print(macAddr)
+	#print(macAddr)
 	print(binascii.hexlify(macAddr).decode())
 	cypher = payload[10:]
 	psk = sqliteConnector.getPSK(binascii.hexlify(macAddr).decode())#TODO: get psk based on macaddr
@@ -128,8 +133,9 @@ def phaseFour(payload):
 	secret = aesKey.decrypt(cypher).decode()
 	if(sqliteConnector.checkSecret(secret,binascii.hexlify(macAddr).decode())):#TODO: check if secret is valid
 		nodeid=sqliteConnector.getNodeID(binascii.hexlify(macAddr).decode())#TODO: get static node
-		
-		nodeid = str(nodeid).encode()
+		sqliteConnector.storeInfra(nodeid,binascii.hexlify(macAddr).decode(),infra[0])
+		print("test :",nodeid)
+		nodeid = bytes([nodeid])
 		#nodeid = binascii.hexlify(bytes([nodeid])).decode()
 		print("P4 nodeid: ",nodeid)
 		cypherNodeID = aesKey.encrypt(pad(nodeid, 16))
