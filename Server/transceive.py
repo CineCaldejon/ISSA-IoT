@@ -1,7 +1,7 @@
 import serial
 import pika
 from queue import Queue
-
+import rlinetest
 BROKER = '192.168.1.102'
 SERPORT = 'COM8'
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=BROKER))
@@ -30,8 +30,10 @@ def callback(ch, method, properties, body):
 def zbRecv():
 	global testlock
 	while True:
-		data = zb.readline()
+		data = rlinetest.newReadLine(zb)
+		#data = zb.readline()
 		packetQueue.put(data[:-2])
+		zb.flush()
 
 def mqRecv():
 	channel.basic_consume(callback,queue=queue_name,no_ack=True)
@@ -42,7 +44,8 @@ def handTransmit(packet):#junk code
 	#zb  = serial.Serial(SERPORT)
 	print("sending(len:",len(binascii.hexlify(packet)),") :",binascii.hexlify(packet))
 	eol= b'\r\n'
-	time.sleep(4)
+	zb.flush()
+	time.sleep(2)
 	zb.write(packet+eol)
 	channel.basic_publish(exchange='clientHand',
                       routing_key='',

@@ -42,9 +42,11 @@ def parseService(packet):
 		if not (validateNode(srcNode[0])):
 			srcNode = 0
 			invalid = 1
+			print("src node is invalid ", srcNode)
 		if not (validateNode(dstNode[0])):
 			dstNode = 0
 			invalid =1
+			print("dst node is invalid ", dstNode)
 
 		if not (invalid):
 			hmac = packet[-16:]
@@ -58,6 +60,7 @@ def parseService(packet):
 
 			return parsePacket
 	else:
+		print("servtype is invalid ", servType)
 		invalid = 1
 
 	if(invalid):

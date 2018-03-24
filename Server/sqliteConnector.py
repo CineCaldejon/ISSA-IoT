@@ -236,6 +236,8 @@ def storeInfra(node,mac,infra):
 	if(infra==0):
 		infraName='802.11'
 
+	print('updating addr table',mac,infraName,node)
+
 	c.execute("UPDATE Addressing SET phyAddress = ? AND Infrastructure = ? WHERE nodeID = ?", (mac,infraName,node))
 
 	conn.commit()
