@@ -3,7 +3,7 @@ from Crypto.Hash import MD5
 import binascii
 from transceive import getZb
 from transceive import WF_transmit
-
+import handValidator
 import time
 
 def InfraQuery(nodeID):
@@ -43,6 +43,7 @@ def handEgress(packet):
 	time.sleep(4)
 	zb.write(packet+eol)
 	WF_transmit(packet)
+	handValidator.checkHandshake(packet)
 
 def Egress(parsePacket):
 	packet = Encapsulator(parsePacket)

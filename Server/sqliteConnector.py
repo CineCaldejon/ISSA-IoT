@@ -144,6 +144,18 @@ def setPhase (macAddr, phase):
 
 	conn.close()
 
+def getPhase(macAddr):
+	conn = sqlite3.connect('test2.db')
+	c=conn.cursor()
+
+	DBPhase = None
+	PhaseConn = conn.execute("SELECT * from Phase where phyAddress = ?",(macAddr,))
+	PhaseRow = PhaseConn.fetchone()
+	if not (PhaseRow == None):
+		DBPhase = PhaseRow[1]
+		return DBPhase
+
+	conn.close()	
 
 def validateCookie(cookie, macAddr):
 	conn = sqlite3.connect('test2.db')

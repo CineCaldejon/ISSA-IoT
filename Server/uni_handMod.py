@@ -100,7 +100,8 @@ def phaseTwo(packet):
 		print("pubKey is: ",binascii.hexlify(exportKey))
 		return infra,phaseHeader+macAddr+exportKey
 	else:
-		return False
+		sqliteConnector.setPhase(macAddr,0)
+		return None,b'\x00\xff'+macAddr
 
 
 def phaseThree(payload):
@@ -121,6 +122,9 @@ def phaseThree(payload):
 		cypherSecret = aesKey.encrypt(secret.encode())
 		#cypherSecret = aesKey.encrypt(pad(secret.encode(),16))
 		return phaseHeader+macAddr+cypherSecret
+	else:
+		sqliteConnector.setPhase(macAddr,0)
+		return b'\x00\xff'+macAddr
 
 def phaseFour(payload,infra):
 	print("infra: ",infra)
@@ -142,4 +146,6 @@ def phaseFour(payload,infra):
 		header = b'\x00\x04'
 		packet = header+macAddr+cypherNodeID
 		return packet
-
+	else:
+		sqliteConnector.setPhase(macAddr,0)
+		return b'\x00\xff'+macAddr
