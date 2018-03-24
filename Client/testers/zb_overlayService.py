@@ -10,7 +10,7 @@ def sendpacket():
 	final = ht.hexdigest()
 	packet = header + bytes.fromhex(final)
 	eol = b'\r\n'
-	zb = serial.Serial('COM9')
+	zb = serial.Serial('COM4')
 	zb.write(packet+eol)
 	zb.close()
 

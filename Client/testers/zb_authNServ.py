@@ -8,7 +8,7 @@ from Crypto.Hash import MD5
 
 BROKER = '192.168.1.4'
 handQueue=Queue()
-SERPORT = 'COM4'
+SERPORT = 'COM9'
 
 def publish(data):
 	zb  = serial.Serial(SERPORT)
@@ -120,7 +120,7 @@ def overTest(dest,payload):
 	final = ht.hexdigest()
 	packet = header + bytes.fromhex(final)
 	publish(packet)
-overTest(b'\x2c',b'hello World!')
+overTest(b'\x2c',b'lumos')
 
 #while True:
 #	print(receive())
