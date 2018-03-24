@@ -1,6 +1,6 @@
 import mq_clientHandshake
 from Crypto.Hash import MD5
-secret,node = mq_clientHandshake.exeHand('HkdW54vs4FrSUS2Y')
+secret,node = mq_clientHandshake.exeHand('MQdW54vs4FrSUS2Y')
 
 def overTest(dest,payload):
 	global secret
@@ -16,4 +16,4 @@ def overTest(dest,payload):
 print("my secret is:",secret)
 print("my node is:",node[0])
 
-overTest(b'\x2c',b'lumos')
+overTest(b'\x28',b'lumos')

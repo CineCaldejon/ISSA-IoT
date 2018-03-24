@@ -135,19 +135,19 @@ def wf_executeHandshake(psk):
 	return (secret,nodeID)
 def phaseOne():
 	header=b'\x00\x00'
-	macAddr = b'\x00\x00\x84\xef\x18\x46\x24\x2b'
+	macAddr = b'\x00\x00\x54\x35\x30\x8c\xeb\x41'
 	packet=header+macAddr
 	return packet
 
 def phaseTwo(packet):
 	header=b'\x00\x01'
-	macAddr = b'\x00\x00\x84\xef\x18\x46\x24\x2b'
+	macAddr = b'\x00\x00\x54\x35\x30\x8c\xeb\x41'
 	cookie=packet[10:]
 	return header+macAddr+cookie
 
 def phaseThree(packet,psk):
 	header = b'\x00\x02'
-	macAddr = b'\x00\x00\x84\xef\x18\x46\x24\x2b'
+	macAddr = b'\x00\x00\x54\x35\x30\x8c\xeb\x41'
 	#psk = "Sixteen Byte key" #TODO: fix
 	derPubKey=packet[10:]
 	pubKey=rsa.PublicKey.load_pkcs1(derPubKey,format='DER')
@@ -157,7 +157,7 @@ def phaseThree(packet,psk):
 def phaseFour(packet):
 	global secret
 	header = b'\x00\x03'
-	macAddr = b'\x00\x00\x84\xef\x18\x46\x24\x2b'
+	macAddr = b'\x00\x00\x54\x35\x30\x8c\xeb\x41'
 	#psk= "Sixteen Byte key"
 	aesKey = AES.new(psk.encode(),AES.MODE_ECB)
 	cypher = packet[10:]
@@ -168,7 +168,7 @@ def phaseFour(packet):
 
 def phaseFive(packet):
 	header = b'\x00\x04'
-	macAddr = b'\x00\x00\x84\xef\x18\x46\x24\x2b'
+	macAddr = b'\x00\x00\x54\x35\x30\x8c\xeb\x41'
 	#psk= "Sixteen Byte key"
 	aesKey = AES.new(psk.encode(),AES.MODE_ECB)
 	cypher = packet[10:]
