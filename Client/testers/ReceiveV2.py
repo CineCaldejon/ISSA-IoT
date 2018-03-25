@@ -2,6 +2,16 @@ from Crypto.Hash import MD5
 import clientServ
 
 
+node = None
+secret = None
+
+
+def SetCreds(s,n):
+	global secret
+	global node
+	node = n
+	secret = s
+
 def Receive(packet):
 	print("RECEIVED PACKET: ", packet)
 	print("CHECKING IF THIS IS FOR ME...")
@@ -30,8 +40,9 @@ def parseService(packet):
 
 		srcNode = packet[2:3]
 		dstNode = packet[3:4]
-
-		if(dstNode[0] == node):
+		print('dstNode',dstNode)
+		print('node',node)
+		if(dstNode == node):
 
 			hmac = packet[-16:]
 			payload = packet[4:-16]
@@ -60,7 +71,7 @@ def HMACCheck(parsePacket):
 	for index in order:
 		headers = headers + parsePacket[index]
 	Hash = parsePacket['HMAC'].hex() # get bytes literally
-	temp = headers + secret.encode()
+	temp = headers + secret
 	ht = MD5.new()
 	ht.update(temp)
 	final = ht.hexdigest()

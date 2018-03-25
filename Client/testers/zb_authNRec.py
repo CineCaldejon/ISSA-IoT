@@ -110,8 +110,9 @@ def phaseFive(packet,psk):
 	return nodeID[0:1]
 
 secret,node = zb_executeHandshake("HkdW54vs4FrSUS2Y")
-#print("my secret is: ",secret)
-#print("my node ID is: ",node[0])
+ReceiveV2.SetCreds(secret,node)
+print("my secret is: ",secret)
+print("my node ID is: ",node[0])
 
 
 def overTest(dest,payload):
@@ -137,15 +138,17 @@ def pullReceive():
 	startTime = time.time()
 	zb  = zbclient_tranceiver.getZb()
 	buff = rlinetest.newReadLine(zb,12)
-	data = ReceiveV2.Receive(buff)
+	if not (buff==b''):
+		data = ReceiveV2.Receive(buff[:-2])
 	curTime = time.time()
 	while(curTime - startTime <12):
-		print(curTime - startTime)
 		buff = rlinetest.newReadLine(zb,12)
-		data = ReceiveV2.Receive(buff)
+		if not(buff==b''):
+			print('buff is',buff[:-2])
+			data = ReceiveV2.Receive(buff[:-2])
+			if(isMyPull(data)):
+				return data[:-2]
 		curTime = time.time()
-		if(isMyPull(data)):
-			return data[:-2]
 	return None
 
 
@@ -177,6 +180,6 @@ def recPackets():
 		zb.close()
 
 
-pullService(b'\x28',b'caliditas')
+print("pull reply is: ",pullService(b'\x28',b'caliditas'))
 #while True:
 #	print(receive())

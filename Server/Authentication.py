@@ -22,6 +22,7 @@ def secretCheck(parsePacket):
 			if (key != 'HMAC'): # take packet except hmac
 				headers = headers + value
 		Hash = parsePacket['HMAC'].hex() # get bytes literally
+		print('db secret is: ',secret)
 		temp = headers + secret.encode()
 		ht = MD5.new()
 		ht.update(temp)

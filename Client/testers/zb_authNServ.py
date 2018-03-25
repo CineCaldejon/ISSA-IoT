@@ -5,7 +5,7 @@ import binascii
 import time
 from Crypto.Hash import MD5
 
-SERPORT = 'COM9'
+SERPORT = 'COM4'
 
 def publish(data):
 	zb  = serial.Serial(SERPORT)
@@ -118,17 +118,7 @@ def overTest(dest,payload):
 	packet = header + bytes.fromhex(final)
 	publish(packet)
 
-#overTest(b'\x2c',b'lumos')
-
-
-def recTest():
-	zb = serial.Serial('COM3', timeout=1)
-	while True:
-		try:
-			data = zb.readline()
-			Receive.Receive(data[:-2])
-		except KeyboardInterrupt:
-			sys.exit()
+overTest(b'\x28',b'lumos')
 
 #while True:
 #	print(receive())
