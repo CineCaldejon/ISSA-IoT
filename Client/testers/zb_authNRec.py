@@ -3,17 +3,24 @@ from Crypto.Cipher import AES
 import serial
 import binascii
 import time
+import ReceiveV2
+import sys
 from Crypto.Hash import MD5
+import threading
+import rlinetest
+import zbclient_tranceiver
 
-SERPORT = 'COM9'
+#secret=None
+#node=None
+secret=b''
+node=b''
 
 def publish(data):
-	zb  = serial.Serial(SERPORT)
+	zb  = zbclient_tranceiver.getZb()
 	eol = b'\r\n'
 	print("sending(len:",len(binascii.hexlify(data)),") :",binascii.hexlify(data))
 	time.sleep(4)	
 	zb.write(data+eol)
-	zb.close()
 
 def forMe(packet):
 	macAddr = b'\x00\x00\x84\xef\x18\x46\x24\x2b'
@@ -27,8 +34,8 @@ def forMe(packet):
 		return False
 
 def receive():
-	zb  = serial.Serial(SERPORT,timeout=12)
-	data = zb.readline()
+	zb  = zbclient_tranceiver.getZb()
+	data = rlinetest.newReadLine(zb,12)
 	print("received: (len:",len(binascii.hexlify(data)),") :",binascii.hexlify(data))
 	if not (data==None):
 		if(forMe(data)):
@@ -103,8 +110,8 @@ def phaseFive(packet,psk):
 	return nodeID[0:1]
 
 secret,node = zb_executeHandshake("HkdW54vs4FrSUS2Y")
-print("my secret is: ",secret)
-print("my node ID is: ",node[0])
+#print("my secret is: ",secret)
+#print("my node ID is: ",node[0])
 
 
 def overTest(dest,payload):
@@ -120,15 +127,56 @@ def overTest(dest,payload):
 
 #overTest(b'\x2c',b'lumos')
 
+def isMyPull(packet):
+	if(packet[1:2]==b'\x02'):
+		return True
+	else:
+		return False	
 
-def recTest():
-	zb = serial.Serial('COM3', timeout=1)
+def pullReceive():
+	startTime = time.time()
+	zb  = zbclient_tranceiver.getZb()
+	buff = rlinetest.newReadLine(zb,12)
+	data = ReceiveV2.Receive(buff)
+	curTime = time.time()
+	while(curTime - startTime <12):
+		print(curTime - startTime)
+		buff = rlinetest.newReadLine(zb,12)
+		data = ReceiveV2.Receive(buff)
+		curTime = time.time()
+		if(isMyPull(data)):
+			return data[:-2]
+	return None
+
+
+def pullService(dest,payload):
+	global secret
+	global node
+	header = b'\x01\x01'+node +dest +payload
+	temp = header + secret
+	ht = MD5.new()
+	ht.update(temp)
+	final = ht.hexdigest()
+	packet = header + bytes.fromhex(final)
+	publish(packet)
+	reply = pullReceive()
+	if(reply==None):
+		print("pull request timed out")
+		return None
+	return reply
+
+def recPackets():
 	while True:
+		zb = serial.Serial(SERPORT, timeout=1)
 		try:
 			data = zb.readline()
 			Receive.Receive(data[:-2])
 		except KeyboardInterrupt:
 			sys.exit()
+		print('endRec')
+		zb.close()
 
+
+pullService(b'\x28',b'caliditas')
 #while True:
 #	print(receive())

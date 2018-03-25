@@ -2,7 +2,7 @@ import serial
 import pika
 from queue import Queue
 import rlinetest
-BROKER = '192.168.1.102'
+BROKER = '192.168.1.3'
 SERPORT = 'COM8'
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=BROKER))
 channel = connection.channel()
