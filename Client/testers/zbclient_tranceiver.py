@@ -2,7 +2,7 @@ import serial
 import Receive
 import rlinetest
 from queue import Queue
-SERPORT = 'COM4'
+SERPORT = 'COM9'
 
 servQueue = Queue()
 zb = serial.Serial(SERPORT,timeout=1)

@@ -4,16 +4,15 @@ import serial
 import binascii
 import time
 from Crypto.Hash import MD5
-
-SERPORT = 'COM4'
+import rlinetest
+import zbclient_tranceiver
 
 def publish(data):
-	zb  = serial.Serial(SERPORT)
+	zb  = zbclient_tranceiver.getZb()
 	eol = b'\r\n'
 	print("sending(len:",len(binascii.hexlify(data)),") :",binascii.hexlify(data))
 	time.sleep(4)	
 	zb.write(data+eol)
-	zb.close()
 
 def forMe(packet):
 	macAddr = b'\x00\x00\x84\xef\x18\x46\x24\x2b'
@@ -27,8 +26,8 @@ def forMe(packet):
 		return False
 
 def receive():
-	zb  = serial.Serial(SERPORT,timeout=12)
-	data = zb.readline()
+	zb  = zbclient_tranceiver.getZb()
+	data = rlinetest.newReadLine(zb,12)
 	print("received: (len:",len(binascii.hexlify(data)),") :",binascii.hexlify(data))
 	if not (data==None):
 		if(forMe(data)):
@@ -118,7 +117,7 @@ def overTest(dest,payload):
 	packet = header + bytes.fromhex(final)
 	publish(packet)
 
-overTest(b'\x28',b'lumos')
+overTest(b'\x16',b'lumos')
 
 #while True:
 #	print(receive())

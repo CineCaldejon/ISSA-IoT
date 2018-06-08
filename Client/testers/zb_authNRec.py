@@ -109,6 +109,9 @@ def phaseFive(packet,psk):
 	print("decrypted is: ",nodeID)
 	return nodeID[0:1]
 
+#secret = b'83A4BF6F17C447A5'
+#node = b'\x27'
+
 secret,node = zb_executeHandshake("HkdW54vs4FrSUS2Y")
 ReceiveV2.SetCreds(secret,node)
 print("my secret is: ",secret)
@@ -141,7 +144,7 @@ def pullReceive():
 	if not (buff==b''):
 		data = ReceiveV2.Receive(buff[:-2])
 	curTime = time.time()
-	while(curTime - startTime <12):
+	while(curTime - startTime <24):
 		buff = rlinetest.newReadLine(zb,12)
 		if not(buff==b''):
 			print('buff is',buff[:-2])
@@ -179,7 +182,14 @@ def recPackets():
 		print('endRec')
 		zb.close()
 
+def parsePull(packet):
+	payload = packet[4:5]
+	print(payload[0])
 
-print("pull reply is: ",pullService(b'\x28',b'caliditas'))
+parsePull(pullService(b'\x28',b'temp'))
+
+#print("pull reply is: ",pullService(b'\x28',b'temp'))
+
+
 #while True:
 #	print(receive())

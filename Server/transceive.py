@@ -2,7 +2,7 @@ import serial
 import pika
 from queue import Queue
 import rlinetest
-BROKER = '192.168.1.3'
+BROKER = '192.168.1.100'
 SERPORT = 'COM8'
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=BROKER))
 channel = connection.channel()
@@ -50,3 +50,4 @@ def handTransmit(packet):#junk code
 	channel.basic_publish(exchange='clientHand',
                       routing_key='',
                       body=packet)
+	
