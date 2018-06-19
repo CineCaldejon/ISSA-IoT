@@ -2,7 +2,7 @@ import serial
 import pika
 from queue import Queue
 import rlinetest
-BROKER = '192.168.1.100'
+BROKER = '192.168.100.14'
 SERPORT = 'COM8'
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=BROKER))
 channel = connection.channel()
@@ -11,12 +11,18 @@ packetQueue = Queue()
 zb = serial.Serial(SERPORT)
 channel.exchange_declare(exchange='serverHand',exchange_type='fanout')
 channel.exchange_declare(exchange='clientHand',exchange_type='fanout')
+channel.exchange_declare(exchange='pullData',exchange_type='fanout')
 result = channel.queue_declare(exclusive=True)
 queue_name = result.method.queue
 channel.queue_bind(exchange='serverHand',queue=queue_name)
 
 def WF_transmit(packet):
-	channel.basic_publish(exchange='clientHand',
+	hType = packet[0:1]
+	servType = packet[1:2]
+	if(hType == b'\x01' and servType == b'\x02'):# check if pull reply
+		channel.basic_publish(exchange='pullData',routing_key='',body=packet)
+	else:
+		channel.basic_publish(exchange='clientHand',
                       routing_key='',
                       body=packet)
 
@@ -45,7 +51,7 @@ def handTransmit(packet):#junk code
 	print("sending(len:",len(binascii.hexlify(packet)),") :",binascii.hexlify(packet))
 	eol= b'\r\n'
 	zb.flush()
-	time.sleep(2)
+	#time.sleep(2)
 	zb.write(packet+eol)
 	channel.basic_publish(exchange='clientHand',
                       routing_key='',

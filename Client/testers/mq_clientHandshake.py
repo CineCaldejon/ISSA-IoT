@@ -6,7 +6,7 @@ from queue import Queue
 import binascii
 import time
 
-BROKER = '192.168.1.106'
+BROKER = '192.168.100.14'
 handQueue=Queue()
 
 def getPhase(packet):

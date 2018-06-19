@@ -5,7 +5,7 @@ from Crypto.Cipher import AES
 from queue import Queue
 import binascii
 import time
-
+# is this obsolete?
 BROKER = '192.168.1.106'
 handQueue=Queue()
 
