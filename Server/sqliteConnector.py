@@ -243,11 +243,41 @@ def storeInfra(node,mac,infra):
 	conn.commit()
 	conn.close()
 
+def getTime():
+	conn = sqlite3.connect('test2.db')
+	c = conn.cursor()
+	c.execute("SELECT * from Timers")
+	c_nodeTimers = c.fetchall()
+	nodeTimers = []
 
-	# 	data = [nodeID, secret]
+	for row in c_nodeTimers:
+		nodeTimers.append(row)
 
-# 	c.execute("INSERT INTO Secret VALUES (?,?)", data)
+	conn.close()
+	return nodeTimers
 
-# 	conn.commit()
+def updateTimer(nodeID,isAlive):
+	conn = sqlite3.connect('test2.db')
+	c=conn.cursor()
+	c.execute("UPDATE Timers SET TTL = ? WHERE nodeID = ?", (isAlive,nodeID))
+	conn.commit()
+	conn.close()
 
-# 	conn.close()
+def getPhyAddr(nodeID):
+	conn = sqlite3.connect('test2.db')
+	c = conn.execute("SELECT * from Addressing where nodeID = ?",(nodeID,))
+	nodeRow = c.fetchone()
+	phyAddress = nodeRow[0]
+	conn.close()
+	return phyAddress
+
+def killNode(nodeID):
+	conn = sqlite3.connect('test2.db')
+	c = conn.cursor()
+	c.execute("DELETE FROM Timers WHERE nodeID = ?",(nodeID,))
+	c.execute("UPDATE Secret SET secret = ? WHERE nodeID = ?",('',nodeID))
+	phyAddress = getPhyAddr(nodeID)
+	c.execute("UPDATE Phase SET phaseNum = 0 WHERE phyAddress = ?",(phyAddress,))
+	conn.commit()
+	conn.close()
+
