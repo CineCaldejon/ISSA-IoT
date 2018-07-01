@@ -154,7 +154,6 @@ def pullReceive():
 		curTime = time.time()
 	return None
 
-
 def pullService(dest,payload):
 	global secret
 	global node
